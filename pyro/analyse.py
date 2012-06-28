@@ -4,6 +4,7 @@
 """Helper routines to analyse various forms of data."""
 
 import numpy as np
+import operator
 
 def average_for_each_key(data):
     """Calculate the average values of each fields
@@ -34,3 +35,14 @@ def average_for_each_key(data):
     else:
         assert False
     return results
+
+def sorted_by_value(data, reverse=True):
+    """Sorted a directory by its value
+
+    @param data a directory
+    @return a sorted list of tuples: [ (k0, v0), (k1, v1) ]
+
+    @see http://stackoverflow.com/questions/613183/python-sort-a-dictionary-by-value
+    """
+    return sorted(data.iteritems(), key=operator.itemgetter(1),
+                  reverse=reverse)
