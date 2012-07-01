@@ -5,6 +5,7 @@
 # License: BSD License
 
 import functools
+import os
 
 class memorized(object):
     """Decorator that caches a function's return value each time it is called.
@@ -65,14 +66,28 @@ class benchmark(object):
      >>> @benchmark(times=1)  # times is a optional parameter.
      >>> def awesome_benchmark(arg1, arg2):
          >>> # do awesome benchmarks.
+
+    @param times How many times should this benchmark run. Optional.
+    @param timeout Set the timeout in seconds.
+    @param silence If true, it do not generate output.
     """
     def __init__(self, **kwargs):
         self.times = kwargs.get('times', 1)
         # Timeout in seconds
         self.timeout = kwargs.get('timeout', 0)
+        self.silence = kwargs.get('silence', False)
 
     def __call__(self, func):
         def benchmark_func(*args):
+            times_start = os.times()
             for i in range(self.times):
                 func(*args)
+            times_end = os.times()
+            user_time = times_end[0] - times_start[0]
+            sys_time = times_end[1] - times_start[1]
+            if not self.silence:
+                print "Run benchmark %s for %d times." % (func.__name__, self.times)
+                print "Total: user time: %fs system time: %fs." % (user_time, sys_time)
+                print "Average: user time: %fs system time %fs." % \
+                    (user_time / self.times, sys_time / self.times)
         return benchmark_func

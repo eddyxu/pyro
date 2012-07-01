@@ -28,7 +28,7 @@ class TestDecorators(unittest.TestCase):
     def test_benchmark(self):
         self.bm_count = 0
 
-        @decorator.benchmark(times=5)
+        @decorator.benchmark(times=5, silence=True)
         def bm_func(obj):
             obj.bm_count += 1
 
