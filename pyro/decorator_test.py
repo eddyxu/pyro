@@ -25,5 +25,15 @@ class TestDecorators(unittest.TestCase):
         foo_func(self)
         self.assertEqual(1, self.call_count)
 
+    def test_benchmark(self):
+        self.bm_count = 0
+
+        @decorator.benchmark(times=5)
+        def bm_func(obj):
+            obj.bm_count += 1
+
+        bm_func(self)
+        self.assertEqual(5, self.bm_count)
+
 if __name__ == "__main__":
     unittest.main()
