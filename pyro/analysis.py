@@ -7,6 +7,7 @@ import numpy as np
 import operator
 import re
 
+
 def are_all_zeros(data):
     """Returns True if all items in the given container are zeros.
     """
@@ -19,6 +20,7 @@ def are_all_zeros(data):
             if item != 0:
                 return False
     return True
+
 
 def average_for_each_key(data):
     """Calculate the average values of each fields
@@ -57,7 +59,7 @@ def sorted_by_value(data, reverse=True):
     @param data a directory
     @return a sorted list of tuples: [ (k0, v0), (k1, v1) ]
 
-    @see http://stackoverflow.com/questions/613183/python-sort-a-dictionary-by-value
+    @see http://bit.ly/gh7OA
     """
     return sorted(data.iteritems(), key=operator.itemgetter(1),
                   reverse=reverse)
@@ -82,14 +84,14 @@ def parse_procstat_data(filename):
                 temp_before['iowait'] = float(items[5])
                 temp = temp + 1
             else:
-                result['user'] = (float(items[1]) - temp_before['user']) \
-                                    * real_time_ratio
-                result['system'] = (float(items[3]) - temp_before['system'])\
-                                    * real_time_ratio
-                result['idle'] = (float(items[4]) - temp_before['idle']) \
-                                    * real_time_ratio
-                result['iowait'] = (float(items[5]) - temp_before['iowait'])\
-                                    * real_time_ratio
+                result['user'] = (float(items[1]) - temp_before['user']) * \
+                    real_time_ratio
+                result['system'] = (float(items[3]) - temp_before['system']) *\
+                    real_time_ratio
+                result['idle'] = (float(items[4]) - temp_before['idle']) * \
+                    real_time_ratio
+                result['iowait'] = (float(items[5]) - temp_before['iowait']) *\
+                    real_time_ratio
     return result
 
 
@@ -115,9 +117,9 @@ def parse_lockstat_data(filepath):
     results = {}
     raw_data = _fetch_data(filepath)
     fields = ['con-bounces', 'contentions',
-            'waittime-min', 'waittime-max', 'waittime-total',
-            'acq-bounces', 'acquisitions',
-            'holdtime-min', 'holdtime-max', 'holdtime-total']
+              'waittime-min', 'waittime-max', 'waittime-total',
+              'acq-bounces', 'acquisitions',
+              'holdtime-min', 'holdtime-max', 'holdtime-total']
     for k, v in raw_data.iteritems():
         if are_all_zeros(v):
             continue
@@ -190,6 +192,8 @@ def parse_postmark_data(filename):
                     write_speed *= 1024
                 result['write'] = write_speed
     return result
+
+
 class Result(object):
     """A simple way to present result
     TODO(eddyxu): Move this class to a more appropriate file.
