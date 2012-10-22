@@ -12,6 +12,7 @@
 import decorator
 import unittest
 
+
 class TestDecorators(unittest.TestCase):
     def test_memoized(self):
         self.call_count = 0

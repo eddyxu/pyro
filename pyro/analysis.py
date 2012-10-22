@@ -1,7 +1,7 @@
 # Copyright 2012 (c) Lei Xu <eddyxu@gmail.com>
 #
 
-"""Helper routines to analyse various forms of data."""
+"""Helper routines to analyse various formats of data."""
 
 import numpy as np
 import operator
@@ -23,14 +23,14 @@ def are_all_zeros(data):
 
 
 def average_for_each_key(data):
-    """Calculate the average values of each fields
+    """Calculates the average values of each fields.
 
     It accept input data from two forms:
      1) dict(key1: [values...], key2: [values]...)
      2) [{key1:value1, key2,value2}, {key1:value3, key2:value4}...]
 
     @param data
-    @return avarage values of each field:
+    @return average values of each field:
         {key1: avg(values), key2: avg(values), ...}
     """
     if not data:
@@ -54,7 +54,7 @@ def average_for_each_key(data):
 
 
 def sorted_by_value(data, reverse=True):
-    """Sorted a directory by its value
+    """Returns a sored dictionary, which is sorted by its values.
 
     @param data a directory
     @return a sorted list of tuples: [ (k0, v0), (k1, v1) ]
@@ -66,7 +66,7 @@ def sorted_by_value(data, reverse=True):
 
 
 def parse_procstat_data(filename):
-    """ parse /proc/stat data, return system time, user time, etc.
+    """Parses /proc/stat file, and returns system time, user time, etc.
     @param filename the path of proc stat output.
     @return delta value of sys time, user time, iowait in a dict.
     """
@@ -96,7 +96,7 @@ def parse_procstat_data(filename):
 
 
 def parse_lockstat_data(filepath):
-    """
+    """Parses the data from lockstat output.
     @param filepath the lock stat file.
     @return delta values of each lock contetions
     """
@@ -131,7 +131,7 @@ def parse_lockstat_data(filepath):
 
 
 def parse_oprofile_data(filename):
-    """Parse data from oprofile output
+    """Parses data from oprofile output.
     """
     result = {}
     with open(filename) as fobj:
@@ -157,7 +157,7 @@ def parse_oprofile_data(filename):
 
 
 def parse_postmark_data(filename):
-    """Parse postmark result data
+    """Parses postmark results.
     """
     result = {}
     with open(filename) as fobj:
@@ -195,7 +195,7 @@ def parse_postmark_data(filename):
 
 
 class Result(object):
-    """A simple way to present result
+    """A simple way to present results.
     TODO(eddyxu): Move this class to a more appropriate file.
     """
     def __init__(self, meta=None):
@@ -248,12 +248,12 @@ class Result(object):
         return self.data_
 
     def keys(self):
-        """Return a list of the keys in the underlying directory.
+        """Returns a list of the keys in the underlying dictionary.
         """
         return self.data_.keys()
 
     def collect(self, *index, **kwargs):
-        """Collect all values according to the given criterials.
+        """Collects all values according to the given criteria.
         """
         def collect_leaf(tree, leaf):
             """Collect the leaf of a tree

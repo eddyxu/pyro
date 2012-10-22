@@ -7,6 +7,7 @@
 import functools
 import os
 
+
 class memorized(object):
     """Decorator that caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned, and
@@ -36,6 +37,7 @@ class memorized(object):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
 
+
 class before(object):
     """Run some functions before the actual execution of the decorated
     function. A typical example, preparing the test environment before running
@@ -49,6 +51,7 @@ class before(object):
         self.func(self.args)
         return func
 
+
 class after(object):
     """After the execution, run some tests.
     """
@@ -58,6 +61,7 @@ class after(object):
 
     def __call__(self, func):
         pass
+
 
 class benchmark(object):
     """Run a function as benchmark for several times.
@@ -86,8 +90,10 @@ class benchmark(object):
             user_time = times_end[0] - times_start[0]
             sys_time = times_end[1] - times_start[1]
             if not self.silence:
-                print "Run benchmark %s for %d times." % (func.__name__, self.times)
-                print "Total: user time: %fs system time: %fs." % (user_time, sys_time)
+                print "Run benchmark %s for %d times." % \
+                    (func.__name__, self.times)
+                print "Total: user time: %fs system time: %fs." % \
+                    (user_time, sys_time)
                 print "Average: user time: %fs system time %fs." % \
                     (user_time / self.times, sys_time / self.times)
         return benchmark_func

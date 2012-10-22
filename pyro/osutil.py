@@ -2,21 +2,23 @@
 #
 # Author: Lei Xu <eddyxu@gmail.com>
 
-"""OS-relaetd helper functions
+"""OS-related helper functions.
 """
 
 import os
-import sys
 import platform
+import sys
 from subprocess import check_call
+
 
 def check_root_or_exit(exit_value=0):
     """Check the user who run this script is root.
     Otherwise, it exits this program.
     """
     if os.getuid() != 0:
-        print >> sys.stderr, "Must run this script with root priviligy."
+        print >> sys.stderr, "Must run this script with root privilege."
         sys.exit(exit_value)
+
 
 def check_os_or_exit(osname, exit_value=0):
     """Only allow to run this script on particular platform.
@@ -28,6 +30,7 @@ def check_os_or_exit(osname, exit_value=0):
         print >> sys.stderr, "Must run this script on %s" % osname
         sys.exit(exit_value)
 
+
 def mount_disk_to_path(dev, mnt, filesystem='ext4'):
     """make a file system on a disk and then mount it
     """
@@ -37,8 +40,9 @@ def mount_disk_to_path(dev, mnt, filesystem='ext4'):
         check_call("mkfs.%s %s" % (filesystem, dev), shell=True)
     check_call("mount -t %s %s %s" % (filesystem, dev, mnt), shell=True)
 
+
 def umount_all(root_path):
-    """Umount all subdirectories under a given root path
+    """Unmount all subdirectories under a given root path
     """
     subdirs = os.listdir(root_path)
     for sub in subdirs:

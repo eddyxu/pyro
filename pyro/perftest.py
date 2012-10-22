@@ -9,6 +9,7 @@ import platform
 import osutil
 from subprocess import check_call as call
 
+
 def clear_cache():
     """Dump all dirty data and clear file system cache
     (including directory cache)..
