@@ -130,6 +130,40 @@ def parse_lockstat_data(filepath):
     return results
 
 
+def get_top_n_locks(data, field, n, **kwargs):
+    """Get top n locks according to the statistic on a field
+
+    @param data the data from parse_lockstat_data
+    @param field specify one field to sort (e.g. waittime-total, acquisitions
+           and etc.)
+    @param n only returns the top N values.
+
+    Optional arguments
+    @param percentage if set to True, returns the percentage of the specified
+           field.
+    @param in_second if set to True, returns the value in seconds.
+
+    TODO: add support for sorting values per acquisition.
+    """
+    percentage = kwargs.get('percentage', False)
+    in_second = kwargs.get('in_second', False)
+    assert not (percentage and in_second)
+
+    temp = {}
+    for lockname, values in data.iteritems():
+        temp[lockname] = values[field]
+
+    if percentage:
+        total_value = sum(temp.values())
+        for lockname, value in temp.iteritems():
+            temp[lockname] = 1.0 * value / total_value
+    elif in_second:
+        # Returns values in second
+        for lockname, value in temp.iteritems():
+            temp[lockname] = value / (10.0 ** 6)
+    return dict(sorted_by_value(temp, reverse=True)[:n])
+
+
 def parse_oprofile_data(filename):
     """Parses data from oprofile output.
     """
@@ -192,6 +226,22 @@ def parse_postmark_data(filename):
                     write_speed *= 1024
                 result['write'] = write_speed
     return result
+
+
+def fill_missing_data(data):
+    """Collects all sub-keys, and fills the missing key with zeros.
+    e.g. data = { 'K1': {k1: 1, k2: 2}, 'K2': {k2:3, k3:4, k4:5} }
+    This function returns
+      { 'K1': {k1:1, k2:2, k3:0, k4:0}, 'K2': {k1:0, k2:3, k3:4, k4:5} }
+    """
+    all_sub_keys = set([])
+    for sub_item in data.values():
+        all_sub_keys.update(sub_item.keys())
+
+    for sub_item in data.values():
+        for key in all_sub_keys:
+            if key not in sub_item:
+                sub_item[key] = 0
 
 
 class Result(object):
