@@ -1,5 +1,7 @@
-# Copyright 2012 (c) Lei Xu <eddyxu@gmail.com>
+#!/usr/bin/env python
 #
+# Copyright 2012 (c) Lei Xu <eddyxu@gmail.com>
+# License: BSD
 
 """Helper routines to analyse various formats of data."""
 
@@ -232,7 +234,7 @@ def parse_perf_data(filename):
     """Parses linux/tool/perf data.
 
     It returns a dictionary:
-        { 'cycles': { 'func_name': 0.10, ... }, 'LLC-miss': {'func_name': 0.01}}
+        {'cycles': {'func_name': 0.10, ...}, 'LLC-miss': {'func_name': 0.01}}
     """
     results = {}
     event_name = None
@@ -251,8 +253,17 @@ def parse_perf_data(filename):
             try:
                 results[event_name][func_name] = overhead
             except:
-                results[event_name] = { func_name: overhead }
+                results[event_name] = {func_name: overhead}
 
+    return results
+
+
+def get_top_n_perf_data(data, n, **kwargs):
+    """Get top-N data from perf data.
+    """
+    results = {}
+    for event, overheads in data.iteritems():
+        results[event] = dict(sorted_by_value(overheads, reverse=True)[:n])
     return results
 
 

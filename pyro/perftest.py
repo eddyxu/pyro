@@ -1,5 +1,6 @@
 # Useful routines for doing performance testing.
 # Author: Lei Xu <eddyxu@gmail.com>
+# License: BSD
 
 """Performance Test related functions.
 """

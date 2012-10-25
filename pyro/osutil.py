@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Author: Lei Xu <eddyxu@gmail.com>
+# License: BSD
 
 """OS-related helper functions.
 """

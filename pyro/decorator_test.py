@@ -5,7 +5,6 @@
 #
 # Copyright: 2011 (c) Lei Xu
 # License: BSD License
-#
 
 """
 """

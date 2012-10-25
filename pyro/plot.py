@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright: 2012 (c) Lei Xu <eddyxu@gmail.com>
+# License: BSD
 
 """Generic Plot Functions"""
 
@@ -10,12 +11,15 @@ import analysis
 
 _LINE_STYLES = ['-', '--', '-.', ':']
 _LINE_MARKERS = ['', 'x', '+', 'o', '^', '.', ',']
+
+
 def line_style_iterator():
     """Iterator all combinations of line styles (and markers)
     """
     for style in itertools.cycle(_LINE_STYLES):
         for marker in _LINE_MARKERS:
             yield style, marker
+
 
 def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
     """A generic function to plot curves
@@ -73,7 +77,7 @@ def plot_dict(data, title, xlabel, ylabel, outfile, **kwargs):
     y_values = {}
     for x_value in x_values:
         y_value = data[x_value]
-        for key,value in y_value.iteritems():
+        for key, value in y_value.iteritems():
             try:
                 y_values[key].append(value)
             except:
