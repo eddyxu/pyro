@@ -228,6 +228,34 @@ def parse_postmark_data(filename):
     return result
 
 
+def parse_perf_data(filename):
+    """Parses linux/tool/perf data.
+
+    It returns a dictionary:
+        { 'cycles': { 'func_name': 0.10, ... }, 'LLC-miss': {'func_name': 0.01}}
+    """
+    results = {}
+    event_name = None
+    with open(filename) as fobj:
+        for line in fobj:
+            line = line.strip()
+            if not line:
+                continue
+            if 'Events' in line:
+                event_name = line.split()[3]
+            if not event_name or line[0] == '#':
+                continue
+            fields = line.split()
+            func_name = fields[4]
+            overhead = float(fields[0][:-1]) / 100.0
+            try:
+                results[event_name][func_name] = overhead
+            except:
+                results[event_name] = { func_name: overhead }
+
+    return results
+
+
 def fill_missing_data(data):
     """Collects all sub-keys, and fills the missing key with zeros.
     e.g. data = { 'K1': {k1: 1, k2: 2}, 'K2': {k2:3, k3:4, k4:5} }
