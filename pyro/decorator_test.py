@@ -1,18 +1,19 @@
 #!/usr/bin/env python
+# Author: U{<Lei Xu<mailto:eddyxu@gmail.com>
 #
-# Unittest for decorator.py
-# Author: U{Lei Xu<mailto:eddyxu@gmail.com>
-#
-# Copyright: 2011 (c) Lei Xu
+# Copyright: 2011 (c) Lei Xu <eddyxu@gmail.com>
 # License: BSD License
 
+"""Unittest for decorators.
 """
-"""
-import decorator
+
+from pyro import decorator
 import unittest
 
 
 class TestDecorators(unittest.TestCase):
+    """Test cases for all decorators.
+    """
     def test_memoized(self):
         self.call_count = 0
 

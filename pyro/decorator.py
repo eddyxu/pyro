@@ -90,10 +90,10 @@ class benchmark(object):
             user_time = times_end[0] - times_start[0]
             sys_time = times_end[1] - times_start[1]
             if not self.silence:
-                print "Run benchmark %s for %d times." % \
-                    (func.__name__, self.times)
-                print "Total: user time: %fs system time: %fs." % \
-                    (user_time, sys_time)
-                print "Average: user time: %fs system time %fs." % \
-                    (user_time / self.times, sys_time / self.times)
+                print("Run benchmark %s for %d times.",
+                      func.__name__, self.times)
+                print("Total: user time: %fs system time: %fs.",
+                      user_time, sys_time)
+                print("Average: user time: %fs system time %fs.",
+                      user_time / self.times, sys_time / self.times)
         return benchmark_func
