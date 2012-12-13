@@ -5,10 +5,12 @@
 """Performance Test related functions.
 """
 
-import sys
-import platform
-import osutil
 from subprocess import check_call as call
+from pyro import osutil
+import platform
+import pyro.plot as mfsplot
+import re
+import sys
 
 
 def clear_cache():
@@ -29,3 +31,270 @@ def clear_cache():
         print >> sys.stderr, \
             'Error: clear_cache(): unsupported system: %s' % system
         sys.exit(1)
+
+
+def parse_procstat_data(filename):
+    """ parse /proc/stat data, return system time, user time, etc.
+    @param before_file
+    @param after_file
+    @return delta value of sys time, user time, iowait in a dict
+    """
+    real_time_ratio = 100
+    result = {}
+    temp = 0
+    temp_before = {}
+    with open(filename) as fobj:
+        for line in fobj:
+            items = line.split()
+            if temp == 0:
+                temp_before['user'] = float(items[1])
+                temp_before['system'] = float(items[3])
+                temp_before['idle'] = float(items[4])
+                temp_before['iowait'] = float(items[5])
+                temp = temp + 1
+            else:
+                result['user'] = (float(items[1]) - temp_before['user']) \
+                    * real_time_ratio
+                result['system'] = (float(items[3]) - temp_before['system'])\
+                    * real_time_ratio
+                result['idle'] = (float(items[4]) - temp_before['idle']) \
+                    * real_time_ratio
+                result['iowait'] = (float(items[5]) - temp_before['iowait'])\
+                    * real_time_ratio
+
+    return result
+
+
+def parse_lockstat_data(filepath):
+    """
+    @param before_file
+    @param after_file
+    @return delta values of each lock contetions
+    """
+    def _fetch_data(fname):
+        """Read a lock stat file and extract data
+        """
+        result = {}
+        with open(fname) as fobj:
+            for line in fobj:
+                match = re.match(r'.+:', line)
+                if match:
+                    items = line.split(':')
+                    key = items[0][:-1].strip()
+                    result[key] = np.array(
+                        [float(x) for x in items[1].split()])
+        return result
+
+    results = {}
+    raw_data = _fetch_data(filepath)
+    fields = ['con-bounces', 'contentions',
+              'waittime-min', 'waittime-max', 'waittime-total',
+              'acq-bounces', 'acquisitions',
+              'holdtime-min', 'holdtime-max', 'holdtime-total']
+    for k, v in raw_data.iteritems():
+        if are_all_zeros(v):
+            continue
+        if len(v) < fields:
+            v = list(v)
+            v.extend([0] * (len(fields) - len(v)))
+        results[k] = dict(zip(fields, v))
+    return results
+
+
+def parse_oprofile_data(filename):
+    """Parse data from oprofile output
+    """
+    result = {}
+    with open(filename) as fobj:
+        events = []
+        for line in fobj:
+            if re.match('^[0-9]+', line):
+                data = line.split()
+                symname = data[-1]
+                result[symname] = {}
+                for i in xrange(len(events)):
+                    evt = events[i]
+                    abs_value = int(data[i * 2])
+                    percent = float(data[i * 2 + 1])
+                    result[symname][evt] = {
+                        'count': abs_value,
+                        '%': percent
+                    }
+                continue
+            if re.match('^Counted', line):
+                events.append(line.split()[1])
+                continue
+    return result
+
+
+def parse_postmark_data(filename):
+    """Parse postmark result data
+    """
+    result = {}
+    with open(filename) as fobj:
+        for line in fobj:
+            matched = re.search(
+                r'Deletion alone: [0-9]+ files \(([0-9]+) per second\)', line)
+            if matched:
+                result['deletion'] = float(matched.group(1))
+
+            matched = re.search(
+                r'Creation alone: [0-9]+ files \(([0-9]+) per second\)', line)
+            if matched:
+                result['creation'] = float(matched.group(1))
+
+            matched = re.search(
+                r'[0-9\.]+ [a-z]+ read \(([0-9\.]+) ([a-z]+) per second\)',
+                line)
+            if matched:
+                unit = matched.group(2)
+                read_speed = float(matched.group(1))
+                if unit == 'megabytes':
+                    read_speed *= 1024
+                result['read'] = read_speed
+
+            matched = re.search(
+                r'[0-9\.]+ [a-z]+ written \(([0-9\.]+) ([a-z]+) per second\)',
+                line)
+            if matched:
+                unit = matched.group(2)
+                write_speed = float(matched.group(1))
+                if unit == 'megabytes':
+                    write_speed *= 1024
+                result['write'] = write_speed
+    return result
+
+
+def get_top_n_funcs_in_oprofile(data, event, topn):
+    """Extract top N results of oprofile data
+
+    @param data the oprofile parsed data
+    @param event event name
+    @param n top N
+    """
+    temp = {}
+    for func_name in data.keys():
+        temp[func_name] = data[func_name][event]['%']
+    return dict(sorted_by_value(temp, reverse=True)[:topn])
+
+
+def trans_top_data_to_curves(data, **kwargs):
+    """Form the top curves
+
+    @param data Preprocessed top N data. A dictionary:
+                { thread: {field0: value, field1: value...}, ...}
+
+    Optional arguments:
+    @param show_all If it is set to True, then show the universal set of all
+                    fields occured in all thread configurations. Otherwise,
+                    Only show the common part (intersection) in all
+                    configurations. Default value is False.
+
+    @return a list of curves
+        [ ([threads], [values], field0), ([threads], [values], field1), ...]
+    """
+    show_all = kwargs.get('show_all', False)
+    threshold = kwargs.get('threshold', 0)
+
+    fields = set()
+    for field_data in data.values():
+        # field_data is {field0: value, field1: value} for each thread/core
+        # configuration.
+        data_fields = set(field_data.keys())
+        if not fields:
+            fields = data_fields
+            continue
+
+        if show_all:
+            # Universal set
+            fields |= data_fields
+        else:
+            # Intersection
+            fields &= data_fields
+
+    threads = sorted(data)
+    curves = []
+    for field in fields:
+        values = []
+        for thd in threads:
+            try:
+                values.append(data[thd][field])
+            except KeyError:
+                values.append(0)
+        if threshold and not filter(lambda x: x > threshold, values):
+            continue
+        curves.append((threads, values, field))
+    return curves
+
+
+def draw_top_functions(data, event, top_n, outfile, **kwargs):
+    """Draw top N functions on one oprofile event
+
+    @param data a directory of oprofile data, { thread: oprofile_data, ... }
+    @param event event name
+    @param top_n only draw top N functions
+    @param outfile output file path
+
+    Optional args:
+    @param title the title of the plot (default: 'Oprofile (EVENT_NAME)')
+    @param xlabel the label on x-axes (default: 'Number of Threads')
+    @param ylabel the label on y-axes (default: 'Samples (%)')
+    @param show_all If set to True, shows all functions occured on any oprofile
+       outputs. Otherwise, it only shows the common functions occured on all
+       oprofile outputs. The default value is False.
+    @param threshold Only output the functions that have values larger than the
+        threshold
+    @param loc set legend location.
+    @param ncol set the number of columns of legend.
+    """
+    # Preprocess optional args
+    title = kwargs.get('title', 'Oprofile (%s)' % event)
+    xlabel = kwargs.get('xlabel', '# of Cores')
+    ylabel = kwargs.get('ylabel', 'Samples (%)')
+    show_all = kwargs.get('show_all', False)
+    threshold = kwargs.get('threshold', 0)
+    loc = kwargs.get('loc', 'upper left')
+    ncol = kwargs.get('ncol', 2)
+
+    top_n_data = {}
+    for thd, op_data in data.iteritems():
+        top_n_data[thd] = get_top_n_funcs_in_oprofile(op_data, event, top_n)
+
+    curves = trans_top_data_to_curves(top_n_data, show_all=show_all,
+                                      threshold=threshold)
+
+    mfsplot.plot(curves, title, xlabel, ylabel, outfile, ncol=ncol, loc=loc)
+
+
+def get_top_n_locks(data, field, n, **kwargs):
+    """Get top n locks according to the statistic on a field
+
+    @param data the data from parse_lockstat_data
+    @param field specify one field to sort (e.g. waittime-total,
+    acquisitions and etc.)
+    @param n only return the top N values
+
+    Optional arguments
+    @param percentage if set to True, returns the percentage of the specified
+    field.
+    @param in_second if set to True, returns the value in seconds.
+
+    TODO: add support for sorting values per acquisition
+    """
+    percentage = kwargs.get('percentage', False)
+    in_second = kwargs.get('in_second', False)
+    assert not (percentage and in_second)
+
+    temp = {}
+    for lockname, values in data.iteritems():
+        temp[lockname] = values[field]
+
+    if percentage:
+        total_value = sum(temp.values())
+        for lockname, value in temp.iteritems():
+            temp[lockname] = 1.0 * value / total_value
+    elif in_second:
+        # Returns values in second
+        for lockname, value in temp.iteritems():
+            temp[lockname] = value / (10.0 ** 6)
+    return dict(sorted_by_value(temp, reverse=True)[:n])

@@ -4,7 +4,7 @@ python:
   - "2.7"
 install:
   - export PYTHONIOENCODING=UTF8 # just in case
-  - 'if [ $TRAVIS_PYTHON_VERSION == "3.2" ] || [ $TRAVIS_PYTHON_VERSION == "3.1" ]; then pip install https://github.com/y-p/numpy/archive/1.6.2_with_travis_fix.tar.gz; fi'
-  - pip install --use-mirrors matplotlib
+  - 'if [ $TRAVIS_PYTHON_VERSION == "3.2" ] || [ $TRAVIS_PYTHON_VERSION == "3.1" ]; then apt-get install python3-numpy; fi'
+  - pip install --use-mirrors matplotlib==1.1
 script:
   - nosetests

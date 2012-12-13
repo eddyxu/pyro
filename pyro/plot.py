@@ -7,10 +7,23 @@
 
 import itertools
 import matplotlib.pyplot as plt
-import analysis
+from pyro import analysis
 
 _LINE_STYLES = ['-', '--', '-.', ':']
 _LINE_MARKERS = ['', 'x', '+', 'o', '^', '.', ',']
+
+
+def auto_label(axe, rects):
+    """Automatically add value labels to bars
+
+    @param axe
+    @param rects
+    """
+    # attach some text labels
+    for rect in rects:
+        height = rect.get_height()
+        axe.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+                '%0.2f%%' % float(height), ha='center', va='bottom')
 
 
 def line_style_iterator():
