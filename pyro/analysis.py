@@ -1,17 +1,74 @@
 #!/usr/bin/env python
 #
 # Copyright 2012 (c) Lei Xu <eddyxu@gmail.com>
-# License: BSD
+# License: BSD License.
 
-"""Helper routines to analyse various formats of data."""
+"""Offers a set of functions to analysis benchmark results.
+"""
 
 import numpy as np
 import operator
+import os
+import plot as mfsplot
 import re
 
 
+def average_for_each_key(data):
+    """Calculate the average values of each fields
+
+    It accept input data from two forms:
+     1) dict(key1: [values...], key2: [values]...)
+     2) [{key1:value1, key2,value2}, {key1:value3, key2:value4}...]
+
+    @param data
+    @return avarage value of each field
+    """
+    if not data:
+        return {}
+    results = {}
+    if type(data) == list:
+        for key in data[0]:
+            total = 0.0
+            count = 0
+            for item in data:
+                total += item[key]
+                count += 1
+            results[key] = float(total) / count
+    elif type(data) == dict:
+        for key, value in data.iteritems():
+            results[key] = np.average(value)
+    else:
+        assert False
+    return results
+
+
+def auto_label(axe, rects):
+    """Automatically add value labels to bars
+
+    @param axe
+    @param rects
+    """
+    # attach some text labels
+    for rect in rects:
+        height = rect.get_height()
+        axe.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+                '%0.2f%%' % float(height), ha='center', va='bottom')
+
+
+def sorted_by_value(data, reverse=True):
+    """Sorted a directory by its value
+
+    @param data a directory
+    @return a sorted list of tuples: [ (k0, v0), (k1, v1) ]
+
+    @see http://stackoverflow.com/questions/613183/python-sort-a-dictionary-by-value
+    """
+    return sorted(data.iteritems(), key=operator.itemgetter(1),
+                  reverse=reverse)
+
+
 def are_all_zeros(data):
-    """Returns True if all items in the given container are zeros.
+    """are all items in the given data zeros.
     """
     if type(data) == dict:
         for key in data:
@@ -24,53 +81,11 @@ def are_all_zeros(data):
     return True
 
 
-def average_for_each_key(data):
-    """Calculates the average values of each fields.
-
-    It accept input data from two forms:
-     1) dict(key1: [values...], key2: [values]...)
-     2) [{key1:value1, key2,value2}, {key1:value3, key2:value4}...]
-
-    @param data
-    @return average values of each field:
-        {key1: avg(values), key2: avg(values), ...}
-    """
-    if not data:
-        return {}
-    results = {}
-    if type(data) == list:
-        keys = data[0].keys()
-        for key in keys:
-            total = 0.0
-            count = 0
-            for item in data:
-                total += item[key]
-                count += 1
-            results[key] = float(total) / count
-    elif type(data) == dict:
-        for key in data.keys():
-            results[key] = np.average(data[key])
-    else:
-        assert False
-    return results
-
-
-def sorted_by_value(data, reverse=True):
-    """Returns a sored dictionary, which is sorted by its values.
-
-    @param data a directory
-    @return a sorted list of tuples: [ (k0, v0), (k1, v1) ]
-
-    @see http://bit.ly/gh7OA
-    """
-    return sorted(data.iteritems(), key=operator.itemgetter(1),
-                  reverse=reverse)
-
-
 def parse_procstat_data(filename):
-    """Parses /proc/stat file, and returns system time, user time, etc.
-    @param filename the path of proc stat output.
-    @return delta value of sys time, user time, iowait in a dict.
+    """ parse /proc/stat data, return system time, user time, etc.
+    @param before_file
+    @param after_file
+    @return delta value of sys time, user time, iowait in a dict
     """
     real_time_ratio = 100
     result = {}
@@ -86,20 +101,22 @@ def parse_procstat_data(filename):
                 temp_before['iowait'] = float(items[5])
                 temp = temp + 1
             else:
-                result['user'] = (float(items[1]) - temp_before['user']) * \
-                    real_time_ratio
-                result['system'] = (float(items[3]) - temp_before['system']) *\
-                    real_time_ratio
-                result['idle'] = (float(items[4]) - temp_before['idle']) * \
-                    real_time_ratio
-                result['iowait'] = (float(items[5]) - temp_before['iowait']) *\
-                    real_time_ratio
+                result['user'] = (float(items[1]) - temp_before['user']) \
+                                    * real_time_ratio
+                result['system'] = (float(items[3]) - temp_before['system'])\
+                                    * real_time_ratio
+                result['idle'] = (float(items[4]) - temp_before['idle']) \
+                                    * real_time_ratio
+                result['iowait'] = (float(items[5]) - temp_before['iowait'])\
+                                    * real_time_ratio
+
     return result
 
 
 def parse_lockstat_data(filepath):
-    """Parses the data from lockstat output.
-    @param filepath the lock stat file.
+    """
+    @param before_file
+    @param after_file
     @return delta values of each lock contetions
     """
     def _fetch_data(fname):
@@ -119,9 +136,9 @@ def parse_lockstat_data(filepath):
     results = {}
     raw_data = _fetch_data(filepath)
     fields = ['con-bounces', 'contentions',
-              'waittime-min', 'waittime-max', 'waittime-total',
-              'acq-bounces', 'acquisitions',
-              'holdtime-min', 'holdtime-max', 'holdtime-total']
+            'waittime-min', 'waittime-max', 'waittime-total',
+            'acq-bounces', 'acquisitions',
+            'holdtime-min', 'holdtime-max', 'holdtime-total']
     for k, v in raw_data.iteritems():
         if are_all_zeros(v):
             continue
@@ -132,42 +149,8 @@ def parse_lockstat_data(filepath):
     return results
 
 
-def get_top_n_locks(data, field, n, **kwargs):
-    """Get top n locks according to the statistic on a field
-
-    @param data the data from parse_lockstat_data
-    @param field specify one field to sort (e.g. waittime-total, acquisitions
-           and etc.)
-    @param n only returns the top N values.
-
-    Optional arguments
-    @param percentage if set to True, returns the percentage of the specified
-           field.
-    @param in_second if set to True, returns the value in seconds.
-
-    TODO: add support for sorting values per acquisition.
-    """
-    percentage = kwargs.get('percentage', False)
-    in_second = kwargs.get('in_second', False)
-    assert not (percentage and in_second)
-
-    temp = {}
-    for lockname, values in data.iteritems():
-        temp[lockname] = values[field]
-
-    if percentage:
-        total_value = sum(temp.values())
-        for lockname, value in temp.iteritems():
-            temp[lockname] = 1.0 * value / total_value
-    elif in_second:
-        # Returns values in second
-        for lockname, value in temp.iteritems():
-            temp[lockname] = value / (10.0 ** 6)
-    return dict(sorted_by_value(temp, reverse=True)[:n])
-
-
 def parse_oprofile_data(filename):
-    """Parses data from oprofile output.
+    """Parse data from oprofile output
     """
     result = {}
     with open(filename) as fobj:
@@ -193,7 +176,7 @@ def parse_oprofile_data(filename):
 
 
 def parse_postmark_data(filename):
-    """Parses postmark results.
+    """Parse postmark result data
     """
     result = {}
     with open(filename) as fobj:
@@ -230,62 +213,149 @@ def parse_postmark_data(filename):
     return result
 
 
-def parse_perf_data(filename):
-    """Parses linux/tool/perf data.
+def get_top_n_funcs_in_oprofile(data, event, topn):
+    """Extract top N results of oprofile data
 
-    It returns a dictionary:
-        {'cycles': {'func_name': 0.10, ...}, 'LLC-miss': {'func_name': 0.01}}
+    @param data the oprofile parsed data
+    @param event event name
+    @param n top N
     """
-    results = {}
-    event_name = None
-    with open(filename) as fobj:
-        for line in fobj:
-            line = line.strip()
-            if not line:
-                continue
-            if 'Events' in line:
-                event_name = line.split()[3]
-            if not event_name or line[0] == '#':
-                continue
-            fields = line.split()
-            func_name = fields[4]
-            overhead = float(fields[0][:-1]) / 100.0
+    temp = {}
+    for func_name in data.keys():
+        temp[func_name] = data[func_name][event]['%']
+    return dict(sorted_by_value(temp, reverse=True)[:topn])
+
+
+def trans_top_data_to_curves(data, **kwargs):
+    """Form the top curves
+
+    @param data Preprocessed top N data. A dictionary:
+                { thread: {field0: value, field1: value...}, ...}
+
+    Optional arguments:
+    @param show_all If it is set to True, then show the universal set of all
+                    fields occured in all thread configurations. Otherwise,
+                    Only show the common part (intersection) in all
+                    configurations. Default value is False.
+
+    @return a list of curves
+        [ ([threads], [values], field0), ([threads], [values], field1), ...]
+    """
+    show_all = kwargs.get('show_all', False)
+    threshold = kwargs.get('threshold', 0)
+
+    fields = set()
+    for field_data in data.values():
+        # field_data is {field0: value, field1: value} for each thread/core
+        # configuration.
+        data_fields = set(field_data.keys())
+        if not fields:
+            fields = data_fields
+            continue
+
+        if show_all:
+            # Universal set
+            fields |= data_fields
+        else:
+            # Intersection
+            fields &= data_fields
+
+    threads = sorted(data)
+    curves = []
+    for field in fields:
+        values = []
+        for thd in threads:
             try:
-                results[event_name][func_name] = overhead
-            except:
-                results[event_name] = {func_name: overhead}
+                values.append(data[thd][field])
+            except KeyError:
+                values.append(0)
+        if threshold and not filter(lambda x: x > threshold, values):
+            continue
+        curves.append((threads, values, field))
+    return curves
 
-    return results
 
+def draw_top_functions(data, event, top_n, outfile, **kwargs):
+    """Draw top N functions on one oprofile event
 
-def get_top_n_perf_data(data, n, **kwargs):
-    """Get top-N data from perf data.
+    @param data a directory of oprofile data, { thread: oprofile_data, ... }
+    @param event event name
+    @param top_n only draw top N functions
+    @param outfile output file path
+
+    Optional args:
+    @param title the title of the plot (default: 'Oprofile (EVENT_NAME)')
+    @param xlabel the label on x-axes (default: 'Number of Threads')
+    @param ylabel the label on y-axes (default: 'Samples (%)')
+    @param show_all If set to True, shows all functions occured on any oprofile
+       outputs. Otherwise, it only shows the common functions occured on all
+       oprofile outputs. The default value is False.
+    @param threshold Only output the functions that have values larger than the
+        threshold
+    @param loc set legend location.
+    @param ncol set the number of columns of legend.
     """
-    results = {}
-    for event, overheads in data.iteritems():
-        results[event] = dict(sorted_by_value(overheads, reverse=True)[:n])
-    return results
+    # Preprocess optional args
+    title = kwargs.get('title', 'Oprofile (%s)' % event)
+    xlabel = kwargs.get('xlabel', '# of Cores')
+    ylabel = kwargs.get('ylabel', 'Samples (%)')
+    show_all = kwargs.get('show_all', False)
+    threshold = kwargs.get('threshold', 0)
+    loc = kwargs.get('loc', 'upper left')
+    ncol = kwargs.get('ncol', 2)
+
+    top_n_data = {}
+    for thd, op_data in data.iteritems():
+        top_n_data[thd] = get_top_n_funcs_in_oprofile(op_data, event, top_n)
+
+    curves = trans_top_data_to_curves(top_n_data, show_all=show_all,
+                                     threshold=threshold)
+
+    mfsplot.plot(curves, title, xlabel, ylabel, outfile, ncol=ncol, loc=loc)
 
 
-def fill_missing_data(data):
-    """Collects all sub-keys, and fills the missing key with zeros.
-    e.g. data = { 'K1': {k1: 1, k2: 2}, 'K2': {k2:3, k3:4, k4:5} }
-    This function returns
-      { 'K1': {k1:1, k2:2, k3:0, k4:0}, 'K2': {k1:0, k2:3, k3:4, k4:5} }
+def get_top_n_locks(data, field, n, **kwargs):
+    """Get top n locks according to the statistic on a field
+
+    @param data the data from parse_lockstat_data
+    @param field specify one field to sort (e.g. waittime-total, acquisitions and etc.)
+    @param n only return the top N values
+
+    Optional arguments
+    @param percentage if set to True, returns the percentage of the specified field.
+    @param in_second if set to True, returns the value in seconds.
+
+    TODO: add support for sorting values per acquisition
     """
-    all_sub_keys = set([])
-    for sub_item in data.values():
-        all_sub_keys.update(sub_item.keys())
+    percentage = kwargs.get('percentage', False)
+    in_second = kwargs.get('in_second', False)
+    assert not (percentage and in_second)
 
-    for sub_item in data.values():
-        for key in all_sub_keys:
-            if key not in sub_item:
-                sub_item[key] = 0
+    temp = {}
+    for lockname, values in data.iteritems():
+        temp[lockname] = values[field]
+
+    if percentage:
+        total_value = sum(temp.values())
+        for lockname, value in temp.iteritems():
+            temp[lockname] = 1.0 * value / total_value
+    elif in_second:
+        # Returns values in second
+        for lockname, value in temp.iteritems():
+            temp[lockname] = value / (10.0**6)
+    return dict(sorted_by_value(temp, reverse=True)[:n])
+
+
+def split_filename(fname, sep='_'):
+    """Split filename into a meaningful slices
+    """
+    basename = os.path.basename(fname)
+    results = os.path.splitext(basename)[0].split(sep)
+    return results
 
 
 class Result(object):
-    """A simple way to present results.
-    TODO(eddyxu): Move this class to a more appropriate file.
+    """A simple way to present result
     """
     def __init__(self, meta=None):
         """@param meta a string to describe the hierachical of result tree
@@ -318,7 +388,7 @@ class Result(object):
             self.depth = len(keys)
 
     def __prepare_data(self, keys):
-        """Create the sub directionaries if they are not existed.
+        """Create the sub directionaries if they are not existed
         """
         tmp = self.data_
         for key in keys:
@@ -332,17 +402,17 @@ class Result(object):
 
     @property
     def data(self):
-        """Access the underlying data.
+        """Access the underlying data
         """
         return self.data_
 
     def keys(self):
-        """Returns a list of the keys in the underlying dictionary.
+        """Return a list of the keys in the underlying directory
         """
         return self.data_.keys()
 
     def collect(self, *index, **kwargs):
-        """Collects all values according to the given criteria.
+        """Collect all values according to the given criterials
         """
         def collect_leaf(tree, leaf):
             """Collect the leaf of a tree
