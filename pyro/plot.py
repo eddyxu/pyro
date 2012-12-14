@@ -23,7 +23,7 @@ def auto_label(axe, rects):
     for rect in rects:
         height = rect.get_height()
         axe.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                '%0.2f%%' % float(height), ha='center', va='bottom')
+                 '%0.2f%%' % float(height), ha='center', va='bottom')
 
 
 def line_style_iterator():
