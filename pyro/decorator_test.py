@@ -8,6 +8,7 @@
 """
 
 from pyro import decorator
+import time
 import unittest
 
 
@@ -35,6 +36,13 @@ class TestDecorators(unittest.TestCase):
 
         bm_func(self)
         self.assertEqual(5, self.bm_count)
+
+    def test_timeit(self):
+        @decorator.timeit
+        def timed_function(self):
+            time.sleep(0.5)
+
+        timed_function()
 
 if __name__ == "__main__":
     unittest.main()
