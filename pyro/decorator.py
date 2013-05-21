@@ -99,18 +99,3 @@ class benchmark(object):
                 print("Average: user time: %fs system time %fs.",
                       user_time / self.times, sys_time / self.times)
         return benchmark_func
-
-
-class timeit(object):
-    def __init__(self, func):
-        self.func = func
-
-    def __call__(self):
-        def timed_func(*args, **kw):
-            ts = time.time()
-            result = self.func(*args, **kw)
-            te = time.time()
-            print('%r (%r, %r) %2.2f seconds'
-                  % (self.func.__name__, args, kw, te - ts))
-            return result
-        return timed_func
