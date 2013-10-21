@@ -101,6 +101,41 @@ def parse_lockstat_data(filepath):
     return results
 
 
+def parse_perf_data(filename, **kwargs):
+    """Parses data from linux perf tool.
+
+    @param filename the perf output file path.
+    """
+    top = kwargs.get('top', 10)
+    result = {}
+    with open(filename) as fobj:
+        k = top
+        event = None
+        event_result = []
+        for line in fobj:
+            line = line.strip()
+            if not event:
+                if re.match(r'^# Samples:.*', line):
+                    #print('matched: {}'.format(line))
+                    event_name = line.split()[-1]
+                    event = event_name.strip("'")
+                    print(event)
+                continue
+            if event and line[0] == '#':
+                continue
+            fields = line.split()
+            percent = float(fields[0][:-1]) / 100
+            event_result.append((percent, fields[1], fields[-1]))
+            k -= 1
+            if not k:
+                result[event] = event_result
+                event_result = []
+                event = None
+                k = top
+                continue
+    return result
+
+
 def parse_oprofile_data(filename):
     """Parse data from oprofile output
     """
