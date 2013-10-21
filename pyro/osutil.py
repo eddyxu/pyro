@@ -53,7 +53,7 @@ def umount_all(root_path):
             check_call("umount %s" % sub_dir_path)
 
 
-def parse_cores(cores):
+def parse_cpus(cores):
     """Parse cores from given parameter, similiar to taskset(1).
     Accepted parameters:
     0  - core 0
@@ -75,6 +75,7 @@ def parse_cores(cores):
             result.update(range(int(core_range[0]), int(core_range[1]) + 1))
     return result
 
+
 def get_all_cpus():
     """Get all available cpus in the system.
     """
@@ -87,10 +88,13 @@ def get_all_cpus():
             result.add(int(cpu_id))
     return result
 
+
 def get_online_cpus():
+    """Return the set of online CPU on the system.
+    """
     online_cpu_string = ''
     with open('/sys/devices/system/cpu/online') as fobj:
         online_cpu_string = fobj.read()
     online_cpu_string = online_cpu_string.strip()
-    online_cpus = parse_cores(online_cpu_string)
+    online_cpus = parse_cpus(online_cpu_string)
     return online_cpus
