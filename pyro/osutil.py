@@ -6,6 +6,7 @@
 """OS-related helper functions.
 """
 
+import glob
 import os
 import platform
 import sys
@@ -50,3 +51,50 @@ def umount_all(root_path):
         sub_dir_path = os.path.join(root_path, sub)
         if os.path.ismount(sub_dir_path):
             check_call("umount %s" % sub_dir_path)
+
+
+def parse_cpus(cores):
+    """Parse cores from given parameter, similiar to taskset(1).
+    Accepted parameters:
+    0  - core 0
+    0,1,2,3  - cores 0,1,2,3
+    0-12,13-15,18,19
+    """
+    result = set()
+    sequences = cores.split(',')
+    for seq in sequences:
+        if not '-' in seq:
+            if not seq.isdigit():
+                raise ValueError('%s is not digital' % seq)
+            result.add(int(seq))
+        else:
+            core_range = seq.split('-')
+            if len(core_range) != 2 or not core_range[0].isdigit() \
+                    or not core_range[1].isdigit():
+                raise ValueError('Core Range Error')
+            result.update(range(int(core_range[0]), int(core_range[1]) + 1))
+    return result
+
+
+def get_all_cpus():
+    """Get all available cpus in the system.
+    """
+    cpu_dirs = glob.glob('/sys/devices/system/cpu/cpu*')
+    result = set()
+    for cpu_dir in cpu_dirs:
+        cpu_path = cpu_dir.split('/')[-1]
+        cpu_id = cpu_path[3:]
+        if cpu_id.isdigit():
+            result.add(int(cpu_id))
+    return result
+
+
+def get_online_cpus():
+    """Return the set of online CPU on the system.
+    """
+    online_cpu_string = ''
+    with open('/sys/devices/system/cpu/online') as fobj:
+        online_cpu_string = fobj.read()
+    online_cpu_string = online_cpu_string.strip()
+    online_cpus = parse_cpus(online_cpu_string)
+    return online_cpus

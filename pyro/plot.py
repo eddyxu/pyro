@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright: 2012 (c) Lei Xu <eddyxu@gmail.com>
+# Copyright: 2013 (c) Lei Xu <eddyxu@gmail.com>
 # License: BSD
 
 """Generic Plot Functions"""
