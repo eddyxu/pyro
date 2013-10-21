@@ -135,13 +135,14 @@ def parse_perf_data(filename, **kwargs):
                 continue
     return result
 
+
 def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     """Plot the event curves for the top functions observed from Linux perf
     tool.
 
     @param data a dictionary of perf data, { thread: perf_data, ...}. The key
-    of this directory is the number of process/thread/cpus to observed the data.
-    The keys of this directory will be used as x axis of the figure.
+    of this directory is the number of process/thread/cpus to observed the
+    data. The keys of this directory will be used as x axis of the figure.
     @param event event name
     @param top_n only draw top N functions.
     @param outfile the output file path.
@@ -170,7 +171,6 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     top_n_data = {}
     for thd, op_data in data.iteritems():
         top_n_data[thd] = get_top_n_funcs_in_oprofile(op_data, event, top_n)
-
 
 
 def parse_oprofile_data(filename):
