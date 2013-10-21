@@ -135,6 +135,43 @@ def parse_perf_data(filename, **kwargs):
                 continue
     return result
 
+def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
+    """Plot the event curves for the top functions observed from Linux perf
+    tool.
+
+    @param data a dictionary of perf data, { thread: perf_data, ...}. The key
+    of this directory is the number of process/thread/cpus to observed the data.
+    The keys of this directory will be used as x axis of the figure.
+    @param event event name
+    @param top_n only draw top N functions.
+    @param outfile the output file path.
+
+    Optional args:
+    @param title the title of the plot (default: 'Oprofile (EVENT_NAME)')
+    @param xlabel the label on x-axes (default: 'Number of Threads')
+    @param ylabel the label on y-axes (default: 'Samples (%)')
+    @param show_all If set to True, shows all functions occured on any oprofile
+       outputs. Otherwise, it only shows the common functions occured on all
+       oprofile outputs. The default value is False.
+    @param threshold Only output the functions that have values larger than the
+        threshold
+    @param loc set legend location.
+    @param ncol set the number of columns of legend.
+    """
+    # Preprocess optional args
+    title = kwargs.get('title', 'Oprofile (%s)' % event)
+    xlabel = kwargs.get('xlabel', '# of Cores')
+    ylabel = kwargs.get('ylabel', 'Samples (%)')
+    show_all = kwargs.get('show_all', False)
+    threshold = kwargs.get('threshold', 0)
+    loc = kwargs.get('loc', 'upper left')
+    ncol = kwargs.get('ncol', 2)
+
+    top_n_data = {}
+    for thd, op_data in data.iteritems():
+        top_n_data[thd] = get_top_n_funcs_in_oprofile(op_data, event, top_n)
+
+
 
 def parse_oprofile_data(filename):
     """Parse data from oprofile output
@@ -265,7 +302,7 @@ def trans_top_data_to_curves(data, **kwargs):
 def draw_top_functions(data, event, top_n, outfile, **kwargs):
     """Draw top N functions on one oprofile event
 
-    @param data a directory of oprofile data, { thread: oprofile_data, ... }
+    @param data a dictionary of oprofile data, { thread: oprofile_data, ... }
     @param event event name
     @param top_n only draw top N functions
     @param outfile output file path

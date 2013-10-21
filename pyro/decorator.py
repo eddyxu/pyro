@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Author: U{Lei Xu<mailto:eddyxu@gmail.com>}
-# Copyright: 2011 (c) Lei Xu <eddyxu@gmail.com>
+# Copyright: 2013 (c) Lei Xu <eddyxu@gmail.com>
 # License: BSD License
 
 from __future__ import print_function
