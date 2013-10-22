@@ -120,7 +120,6 @@ def parse_perf_data(filename, **kwargs):
                     #print('matched: {}'.format(line))
                     event_name = line.split()[-1]
                     event = event_name.strip("'")
-                    print(event)
                 continue
             if event and line[0] == '#':
                 continue
