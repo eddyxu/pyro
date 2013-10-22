@@ -61,7 +61,7 @@ def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
     style_iterator = line_style_iterator()
     for xvalues, yvalues, label in curves:
         if color_theme == 'black':
-            style, marker = style_iterator.next()
+            style, marker = style_iterator.__next__()
             plt.plot(xvalues, yvalues, label=label, color='k', ls=style,
                      marker=marker)
         else:

@@ -11,6 +11,7 @@ import platform
 import pyro.plot as mfsplot
 import re
 import sys
+import matplotlib.pyplot as plt
 
 
 def clear_cache():
@@ -135,13 +136,14 @@ def parse_perf_data(filename, **kwargs):
                 continue
     return result
 
+
 def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     """Plot the event curves for the top functions observed from Linux perf
     tool.
 
     @param data a dictionary of perf data, { thread: perf_data, ...}. The key
-    of this directory is the number of process/thread/cpus to observed the data.
-    The keys of this directory will be used as x axis of the figure.
+    of this directory is the number of process/thread/cpus to observed the
+    data. The keys of this directory will be used as x axis of the figure.
     @param event event name
     @param top_n only draw top N functions.
     @param outfile the output file path.
@@ -159,7 +161,7 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     @param ncol set the number of columns of legend.
     """
     # Preprocess optional args
-    title = kwargs.get('title', 'Oprofile (%s)' % event)
+    title = kwargs.get('title', 'Perf (%s)' % event)
     xlabel = kwargs.get('xlabel', '# of Cores')
     ylabel = kwargs.get('ylabel', 'Samples (%)')
     show_all = kwargs.get('show_all', False)
@@ -167,9 +169,31 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     loc = kwargs.get('loc', 'upper left')
     ncol = kwargs.get('ncol', 2)
 
-    top_n_data = {}
-    for thd, op_data in data.iteritems():
-        top_n_data[thd] = get_top_n_funcs_in_oprofile(op_data, event, top_n)
+    plot_data = data[event]
+    print(plot_data.keys())
+    print(plot_data.values())
+    keys = sorted(plot_data.keys())
+
+    func_names = set()
+    for v in plot_data.values():
+        func_names |= v.keys()
+    print(func_names)
+
+    # Move to pyro.plot
+    curves = []
+    for func in func_names:
+        yvalues = []
+        for x in keys:
+            try:
+                yvalues.append(plot_data[x][func])
+            except KeyError:
+                yvalues.append(0)
+        if threshold > 0 and max(yvalues) < threshold:
+            continue
+        curves.append((keys, yvalues, func))
+    mfsplot.plot(curves, title, xlabel, ylabel, outfile, ncol=ncol, loc=loc,
+                 ylim=(0,0.5))
+
 
 
 

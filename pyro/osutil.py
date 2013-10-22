@@ -98,3 +98,11 @@ def get_online_cpus():
     online_cpu_string = online_cpu_string.strip()
     online_cpus = parse_cpus(online_cpu_string)
     return online_cpus
+
+
+def get_total_memory():
+    """Return the total memory size in KB.
+    """
+    with open('/proc/meminfo') as fobj:
+        total = fobj.readline().strip().split()[1]
+    return int(total)
