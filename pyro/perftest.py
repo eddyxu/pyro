@@ -170,16 +170,12 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     ncol = kwargs.get('ncol', 2)
 
     plot_data = data[event]
-    print(plot_data.keys())
-    print(plot_data.values())
     keys = sorted(plot_data.keys())
 
     func_names = set()
     for v in plot_data.values():
         func_names |= v.keys()
-    print(func_names)
 
-    # Move to pyro.plot
     curves = []
     for func in func_names:
         yvalues = []
@@ -188,12 +184,11 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
                 yvalues.append(plot_data[x][func])
             except KeyError:
                 yvalues.append(0)
-        if threshold > 0 and max(yvalues) < threshold:
+        if not show_all and threshold > 0 and max(yvalues) < threshold:
             continue
         curves.append((keys, yvalues, func))
     mfsplot.plot(curves, title, xlabel, ylabel, outfile, ncol=ncol, loc=loc,
-                 ylim=(0,0.5))
-
+                 ylim=(0, 0.5))
 
 
 def parse_oprofile_data(filename):
