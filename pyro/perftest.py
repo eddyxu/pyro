@@ -196,7 +196,6 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
 
 
 
-
 def parse_oprofile_data(filename):
     """Parse data from oprofile output
     """
