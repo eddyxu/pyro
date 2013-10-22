@@ -148,8 +148,8 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     @param outfile the output file path.
 
     Optional args:
-    @param title the title of the plot (default: 'Oprofile (EVENT_NAME)')
-    @param xlabel the label on x-axes (default: 'Number of Threads')
+    @param title the title of the plot (default: 'Perf (EVENT_NAME)')
+    @param xlabel the label on x-axes (default: '# of Cores')
     @param ylabel the label on y-axes (default: 'Samples (%)')
     @param show_all If set to True, shows all functions occured on any oprofile
        outputs. Otherwise, it only shows the common functions occured on all
