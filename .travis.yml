@@ -5,9 +5,7 @@ python:
 virtualenv:
   system_site_packages: true
 install:
-  - sudo add-apt-repository -y ppa:takluyver/python3
-  - sudo apt-get update
-  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then sudo apt-get install -qq python3-numpy python3-scipy matplotlib; fi'
-  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then sudo apt-get install -qq python-numpy python-scipy python-matplotlib; fi'
+  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then pip install https://github.com/y-p/numpy/archive/1.6.2_with_travis_fix.tar.gz && pip install --use-mirrors matplotlib; fi'
+  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then sudo apt-get install -qq python-numpy python-matplotlib; fi'
 script:
   - nosetests
