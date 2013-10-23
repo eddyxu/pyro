@@ -3,9 +3,11 @@ python:
   - "2.7"
   - "3.2"
 #  - "3.3"
+virtualenv:
+  system_site_packages: true
 install:
-  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then pip install https://github.com/y-p/numpy/archive/1.6.2_with_travis_fix.tar.gz; fi'
-  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install numpy; fi' # should be nop if pre-installed
+  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then sudo apt-get install -qq python3-numpy python3-scipy; fi'
+  - 'if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then sudo apt-get install -qq python-numpy python-scipy; fi' # should be nop if pre-installed
   - export PYTHONIOENCODING=UTF8 # just in case
   - pip install --use-mirrors matplotlib
 script:
