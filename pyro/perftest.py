@@ -7,11 +7,13 @@
 
 from subprocess import check_call as call
 from pyro import osutil
+import matplotlib.pyplot as plt
+import numpy as np
 import platform
 import pyro.plot as mfsplot
+from pyro.analysis import are_all_zeros
 import re
 import sys
-import matplotlib.pyplot as plt
 
 
 def clear_cache():
@@ -80,10 +82,11 @@ def parse_lockstat_data(filepath):
             for line in fobj:
                 match = re.match(r'.+:', line)
                 if match:
-                    items = line.split(':')
-                    key = items[0][:-1].strip()
+                    last_colon = line.rfind(':')
+                    key = line[:last_colon]
+                    values = line[last_colon + 1:].strip()
                     result[key] = np.array(
-                        [float(x) for x in items[1].split()])
+                        [float(x) for x in values.split()])
         return result
 
     results = {}
@@ -92,10 +95,10 @@ def parse_lockstat_data(filepath):
               'waittime-min', 'waittime-max', 'waittime-total',
               'acq-bounces', 'acquisitions',
               'holdtime-min', 'holdtime-max', 'holdtime-total']
-    for k, v in raw_data.iteritems():
+    for k, v in raw_data.items():
         if are_all_zeros(v):
             continue
-        if len(v) < fields:
+        if len(v) < len(fields):
             v = list(v)
             v.extend([0] * (len(fields) - len(v)))
         results[k] = dict(zip(fields, v))
