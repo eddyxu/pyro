@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import platform
 import pyro.plot as mfsplot
-from pyro.analysis import are_all_zeros
+from pyro.analysis import are_all_zeros, sorted_by_value
 import re
 import sys
 
@@ -83,7 +83,7 @@ def parse_lockstat_data(filepath):
                 match = re.match(r'.+:', line)
                 if match:
                     last_colon = line.rfind(':')
-                    key = line[:last_colon]
+                    key = line[:last_colon].strip()
                     values = line[last_colon + 1:].strip()
                     result[key] = np.array(
                         [float(x) for x in values.split()])
@@ -378,15 +378,15 @@ def get_top_n_locks(data, field, n, **kwargs):
     assert not (percentage and in_second)
 
     temp = {}
-    for lockname, values in data.iteritems():
+    for lockname, values in data.items():
         temp[lockname] = values[field]
 
     if percentage:
         total_value = sum(temp.values())
-        for lockname, value in temp.iteritems():
+        for lockname, value in temp.items():
             temp[lockname] = 1.0 * value / total_value
     elif in_second:
         # Returns values in second
-        for lockname, value in temp.iteritems():
+        for lockname, value in temp.items():
             temp[lockname] = value / (10.0 ** 6)
     return dict(sorted_by_value(temp, reverse=True)[:n])

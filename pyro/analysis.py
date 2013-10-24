@@ -48,7 +48,7 @@ def sorted_by_value(data, reverse=True):
 
     @see http://bit.ly/gh7OA
     """
-    return sorted(data.iteritems(), key=operator.itemgetter(1),
+    return sorted(data.items(), key=operator.itemgetter(1),
                   reverse=reverse)
 
 
