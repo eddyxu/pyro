@@ -6,6 +6,7 @@
 """OS-related helper functions.
 """
 
+from __future__ import print_function
 import glob
 import os
 import platform
