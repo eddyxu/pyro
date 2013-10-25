@@ -33,14 +33,34 @@ def check_os_or_exit(osname, exit_value=0):
         sys.exit(exit_value)
 
 
-def mount_disk_to_path(dev, mnt, filesystem='ext4'):
-    """make a file system on a disk and then mount it
+def clear_cache():
+    """Clear system cache.
     """
-    if filesystem == 'xfs':
-        check_call("mkfs.%s -f %s" % (filesystem, dev), shell=True)
+    check_root_or_exit()
+    check_call('sync')
+    check_call('echo 3 > /proc/sys/vm/drop_caches', shell=True)
+
+
+def mount(dev, mnt, **kwargs):
+    """make a file system on a disk and then mount it
+
+    @param dev the device.
+    @param mnt the mount point.
+
+    Optional args:
+    @param format the file system format (e.g. ext4 or btrfs)
+    @param no_journal sets to True to turn off journaling.
+    """
+    fs_format = kwargs.get('format', 'ext4')
+    no_journal = kwargs.get('no_journal', False)
+    if fs_format == 'xfs':
+        check_call("mkfs.%s -f %s" % (fs_format, dev), shell=True)
     else:
-        check_call("mkfs.%s %s" % (filesystem, dev), shell=True)
-    check_call("mount -t %s %s %s" % (filesystem, dev, mnt), shell=True)
+        check_call("mkfs.%s %s" % (fs_format, dev), shell=True)
+        if no_journal and fs_format == 'ext4':
+            check_call('tune2fs -O ^has_journal {}'.format(disk))
+
+    check_call("mount -t %s %s %s" % (fs_format, dev, mnt), shell=True)
 
 
 def umount_all(root_path):
