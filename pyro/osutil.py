@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Author: Lei Xu <eddyxu@gmail.com>
 # License: BSD
@@ -18,7 +18,7 @@ def check_root_or_exit(exit_value=0):
     Otherwise, it exits this program.
     """
     if os.getuid() != 0:
-        print >> sys.stderr, "Must run this script with root privilege."
+        print("Must run this script with root privilege.", file=sys.stderr)
         sys.exit(exit_value)
 
 
@@ -29,7 +29,7 @@ def check_os_or_exit(osname, exit_value=0):
     @param exit_value the return value by sys.exit()
     """
     if platform.system() != osname:
-        print >> sys.stderr, "Must run this script on %s" % osname
+        print("Must run this script on {}".format(osname), file=sys.stderr)
         sys.exit(exit_value)
 
 
