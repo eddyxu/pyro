@@ -70,7 +70,7 @@ def umount_all(root_path):
     for sub in subdirs:
         sub_dir_path = os.path.join(root_path, sub)
         if os.path.ismount(sub_dir_path):
-            check_call("umount %s" % sub_dir_path)
+            check_call("umount %s" % sub_dir_path, shell=True)
 
 
 def parse_cpus(cores):
