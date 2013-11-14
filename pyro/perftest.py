@@ -83,7 +83,7 @@ def parse_lockstat_data(filepath):
                 match = re.match(r'.+:', line)
                 if match:
                     last_colon = line.rfind(':')
-                    key = line[:last_colon].strip()
+                    key = line[:last_colon].strip(' \t&()')
                     values = line[last_colon + 1:].strip()
                     result[key] = np.array(
                         [float(x) for x in values.split()])
@@ -287,6 +287,7 @@ def trans_top_data_to_curves(data, **kwargs):
     """
     show_all = kwargs.get('show_all', False)
     threshold = kwargs.get('threshold', 0)
+    top_n = kwargs.get('top_n', 0)
 
     fields = set()
     for field_data in data.values():
@@ -316,6 +317,21 @@ def trans_top_data_to_curves(data, **kwargs):
         if threshold and not filter(lambda x: x > threshold, values):
             continue
         curves.append((threads, values, field))
+
+    if top_n > 0:
+        max_curve_map = {}
+        for curve in curves:
+            threads, values, field = curve
+            max_curve_map[field] = max(values)
+        values = sorted(list(max_curve_map.values()))
+        values.reverse()
+        if top_n <= len(values):
+            values = values[:top_n]
+        new_curves = []
+        for curve in curves:
+            if max_curve_map[curve[2]] in values:
+                new_curves.append(curve)
+        curves = new_curves
     return curves
 
 
