@@ -51,17 +51,24 @@ def mount(dev, mnt, **kwargs):
     Optional args:
     @param format the file system format (e.g. ext4 or btrfs)
     @param no_journal sets to True to turn off journaling.
+    @param options mouting options
     """
     fs_format = kwargs.get('format', 'ext4')
     no_journal = kwargs.get('no_journal', False)
+    options = kwargs.get('options', '')
     if fs_format == 'xfs':
         check_call("mkfs.%s -f %s" % (fs_format, dev), shell=True)
     else:
         check_call("mkfs.%s %s" % (fs_format, dev), shell=True)
         if no_journal and fs_format == 'ext4':
-            check_call('tune2fs -O ^has_journal {}'.format(disk))
+            check_call('tune2fs -O ^has_journal {}'.format(dev))
 
-    check_call("mount -t %s %s %s" % (fs_format, dev, mnt), shell=True)
+    opt_param = ''
+    if options:
+        opt_param = '-o %s' % options
+
+    check_call("mount -t %s %s %s %s" % (fs_format, opt_param, dev, mnt),
+               shell=True)
 
 
 def umount_all(root_path):
