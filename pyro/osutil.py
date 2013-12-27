@@ -61,7 +61,7 @@ def mount(dev, mnt, **kwargs):
     else:
         check_call("mkfs.%s %s" % (fs_format, dev), shell=True)
         if no_journal and fs_format == 'ext4':
-            check_call('tune2fs -O ^has_journal {}'.format(dev))
+            check_call('tune2fs -O ^has_journal {}'.format(dev), shell=True)
 
     opt_param = ''
     if options:
