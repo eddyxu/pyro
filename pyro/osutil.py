@@ -57,15 +57,15 @@ def mount(dev, mnt, **kwargs):
     no_journal = kwargs.get('no_journal', False)
     options = kwargs.get('options', '')
     if fs_format == 'xfs':
-        check_call("mkfs.%s -f %s" % (fs_format, dev), shell=True)
+        check_call("mkfs.{} -f {}".format(fs_format, dev), shell=True)
     else:
-        check_call("mkfs.%s %s" % (fs_format, dev), shell=True)
+        check_call("mkfs.{} {}".format(fs_format, dev), shell=True)
         if no_journal and fs_format == 'ext4':
             check_call('tune2fs -O ^has_journal {}'.format(dev), shell=True)
 
     opt_param = ''
     if options:
-        opt_param = '-o %s' % options
+        opt_param = '-o {}'.format(options)
 
     check_call("mount -t %s %s %s %s" % (fs_format, opt_param, dev, mnt),
                shell=True)

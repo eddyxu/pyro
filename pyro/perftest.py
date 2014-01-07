@@ -178,7 +178,7 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
     for v in plot_data.values():
         func_names |= v.keys()
 
-    curves = []
+    curve_features = []
     for func in func_names:
         yvalues = []
         for x in keys:
@@ -188,7 +188,16 @@ def plot_top_perf_functions(data, event, top_n, outfile, **kwargs):
                 yvalues.append(0)
         if not show_all and threshold > 0 and max(yvalues) < threshold:
             continue
-        curves.append((keys, yvalues, func))
+        curve_features.append((max(yvalues), (keys, yvalues, func)))
+
+    # Find top n curves
+    curves = []
+    curve_features.sort()
+    curve_features.reverse()
+    num_features = min(len(curve_features), top_n)
+    for curve in curve_features[:num_features]:
+        curves.append(curve[1])
+
     mfsplot.plot(curves, title, xlabel, ylabel, outfile, ncol=ncol, loc=loc,
                  ylim=(0, 0.5))
 
