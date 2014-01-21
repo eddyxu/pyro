@@ -41,10 +41,14 @@ class Checkpoint(object):
         self.logfile.flush()
 
     def start(self):
+        """Call this function to indicate that a step has started.
+        """
         self.logfile.write('{} {}\n'.format(self.START_PREFIX, self.steps + 1))
         self.logfile.flush()
 
     def done(self):
+        """Indicates that a step has successfully finished.
+        """
         self.steps += 1
         self.logfile.write('{} {}\n'.format(self.DONE_PREFIX, self.steps))
         self.logfile.flush()
