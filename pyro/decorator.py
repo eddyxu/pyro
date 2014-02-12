@@ -7,7 +7,6 @@
 from __future__ import print_function
 import functools
 import os
-import time
 
 
 class memorized(object):
@@ -69,9 +68,9 @@ class benchmark(object):
     """Run a function as benchmark for several times.
 
     Usage:
-     >>> @benchmark(times=1)  # times is a optional parameter.
-     >>> def awesome_benchmark(arg1, arg2):
-         >>> # do awesome benchmarks.
+    >>> @benchmark(times=1)  # times is a optional parameter.
+    >>> def awesome_benchmark(arg1, arg2):
+        >>> # do awesome benchmarks.
 
     @param times How many times should this benchmark run. Optional.
     @param timeout Set the timeout in seconds.

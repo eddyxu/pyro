@@ -14,3 +14,5 @@ develop-eggs
 .installed.cfg
 
 *.swp
+.idea
+.DS_Store

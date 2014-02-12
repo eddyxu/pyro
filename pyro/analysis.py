@@ -7,8 +7,8 @@
 """
 
 import numpy as np
-import operator
 import os
+import operator
 
 
 def average_for_each_key(data):
@@ -137,14 +137,14 @@ class Result(object):
         def collect_leaf(tree, leaf):
             """Collect the leaf of a tree
             """
-            results = []
+            leaves = []
             for key in tree.keys():
                 node = tree[key]
                 if type(node) in [dict, list, set, tuple]:
-                    results.extend(collect_leaf(node, leaf))
+                    leaves.extend(collect_leaf(node, leaf))
                 elif not targeted_key or key == leaf:
-                    results.append(node)
-            return results
+                    leaves.append(node)
+            return leaves
 
         results = []
         node = self.__getitem__(index)
