@@ -56,7 +56,7 @@ def mount(dev, mnt, **kwargs):
     fs_format = kwargs.get('format', 'ext4')
     no_journal = kwargs.get('no_journal', False)
     options = kwargs.get('options', '')
-    if fs_format == 'xfs':
+    if fs_format == 'xfs' or fs_format == 'btrfs':
         check_call("mkfs.{} -f {}".format(fs_format, dev), shell=True)
     else:
         check_call("mkfs.{} {}".format(fs_format, dev), shell=True)
