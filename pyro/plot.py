@@ -93,7 +93,7 @@ def plot_dict(data, title, xlabel, ylabel, outfile, **kwargs):
         for key, value in y_value.iteritems():
             try:
                 y_values[key].append(value)
-            except:
+            except KeyError:
                 y_values[key] = [value]
     curves = []
     for label, y_value in y_values.iteritems():

@@ -7,7 +7,6 @@
 
 from subprocess import check_call as call
 from pyro import osutil
-import matplotlib.pyplot as plt
 import numpy as np
 import platform
 import pyro.plot as mfsplot
@@ -38,8 +37,7 @@ def clear_cache():
 
 def parse_procstat_data(filename):
     """ parse /proc/stat data, return system time, user time, etc.
-    @param before_file
-    @param after_file
+    @param filename
     @return delta value of sys time, user time, iowait in a dict
     """
     real_time_ratio = 100
@@ -54,7 +52,7 @@ def parse_procstat_data(filename):
                 temp_before['system'] = float(items[3])
                 temp_before['idle'] = float(items[4])
                 temp_before['iowait'] = float(items[5])
-                temp = temp + 1
+                temp += 1
             else:
                 result['user'] = (float(items[1]) - temp_before['user']) \
                     * real_time_ratio
