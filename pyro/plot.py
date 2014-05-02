@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-# Copyright: 2013 (c) Lei Xu <eddyxu@gmail.com>
+# Copyright: 2014 (c) Lei Xu <eddyxu@gmail.com>
 # License: BSD
 
 """Generic Plot Functions"""
 
 import itertools
 import matplotlib.pyplot as plt
-from pyro import analysis
 
 _LINE_STYLES = ['-', '--', '-.', ':']
 _LINE_MARKERS = ['', 'x', '+', 'o', '^', '.', ',']
