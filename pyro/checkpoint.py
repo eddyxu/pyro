@@ -52,3 +52,8 @@ class Checkpoint(object):
         self.steps += 1
         self.logfile.write('{} {}\n'.format(self.DONE_PREFIX, self.steps))
         self.logfile.flush()
+
+    def should_skip(self, steps):
+        """Returns True if this step should be skipped.
+        """
+        return self.steps >= steps
