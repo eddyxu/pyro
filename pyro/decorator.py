@@ -47,6 +47,7 @@ class before(object):
     def __init__(self, func, *args, **kwargs):
         self.func = func
         self.args = args
+        self.kwargs = kwargs
 
     def __call__(self, func):
         self.func(self.args)
@@ -59,6 +60,7 @@ class after(object):
     def __init__(self, func, *args, **kwargs):
         self.func = func
         self.args = args
+        self.kwargs = kwargs
 
     def __call__(self, func):
         pass
@@ -85,7 +87,7 @@ class benchmark(object):
     def __call__(self, func):
         def benchmark_func(*args):
             times_start = os.times()
-            for i in range(self.times):
+            for _ in range(self.times):
                 func(*args)
             times_end = os.times()
             user_time = times_end[0] - times_start[0]

@@ -91,7 +91,7 @@ def parse_cpus(cores):
     result = set()
     sequences = cores.split(',')
     for seq in sequences:
-        if not '-' in seq:
+        if '-' not in seq:
             if not seq.isdigit():
                 raise ValueError('%s is not digital' % seq)
             result.add(int(seq))
