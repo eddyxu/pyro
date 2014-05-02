@@ -92,7 +92,7 @@ class Result(object):
         if type(keys) == tuple:
             data = self.data_
             for key in keys:
-                if not key in data:
+                if key not in data:
                     return None
                 data = data[key]
             return data

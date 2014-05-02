@@ -6,13 +6,14 @@
 """
 
 from subprocess import check_call as call
-from pyro import osutil
 import numpy as np
 import platform
-import pyro.plot as mfsplot
-from pyro.analysis import are_all_zeros, sorted_by_value
 import re
 import sys
+
+from pyro import osutil
+from pyro.analysis import are_all_zeros, sorted_by_value
+import pyro.plot as mfsplot
 
 
 def clear_cache():
@@ -118,7 +119,7 @@ def parse_perf_data(filename, **kwargs):
             line = line.strip()
             if not event:
                 if re.match(r'^# Samples:.*', line):
-                    #print('matched: {}'.format(line))
+                    # print('matched: {}'.format(line))
                     event_name = line.split()[-1]
                     event = event_name.strip("'")
                 continue

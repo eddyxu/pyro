@@ -85,7 +85,7 @@ def plot_dict(data, title, xlabel, ylabel, outfile, **kwargs):
     @param reverse sets to true to use 2nd-level keys as x-axis.
     """
     assert type(data) == dict
-    analysis.fill_missing_data(data)
+    # analysis.fill_missing_data(data)
     x_values = sorted(data.keys())
     y_values = {}
     for x_value in x_values:
