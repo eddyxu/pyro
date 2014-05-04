@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 from subprocess import call, check_output
+import os
 
 
 class Profiler(object):
@@ -58,14 +59,24 @@ class NonProfiler(Profiler):
 class LockstatProfiler(Profiler):
     """The Profiler to get /proc/lock_stat data
     """
+    LOCKSTAT = '/proc/lock_stat'
     def __init__(self):
         self.report_ = ""
 
     @staticmethod
-    def clear_lockstat(self):
+    def check_avail():
+        """Check whether the kernel support such a feature.
+        """
+        if not os.path.exists(LockstatProfiler.LOCKSTAT):
+            raise RuntimeError(
+                "/proc/lock_stat does not exist. Please consider re-compile "
+                "kernel with 'CONFIG_LOCK_STAT' tuned on.")
+
+    @staticmethod
+    def clear_lockstat():
         """Clear the statistics data of kernel lock
         """
-        with open('/proc/lock_stat', 'w') as fobj:
+        with open(LockstatProfiler.LOCKSTAT, 'w') as fobj:
             fobj.write('0\n')
 
     def start(self):
@@ -76,7 +87,7 @@ class LockstatProfiler(Profiler):
     def stop(self):
         """Stops to monitor lock stats and gather the results.
         """
-        with open('/proc/lock_stat', 'r') as fobj:
+        with open(self.LOCKSTAT, 'r') as fobj:
             self.report_ = fobj.read()
 
     def report(self):
