@@ -56,8 +56,8 @@ def are_all_zeros(data):
     """are all items in the given data zeros.
     """
     if type(data) == dict:
-        for key in data:
-            if data[key] != 0:
+        for _, value in data.items():
+            if value != 0:
                 return False
     else:
         for item in data:
@@ -138,7 +138,7 @@ class Result(object):
             """Collect the leaf of a tree
             """
             leaves = []
-            for key in tree.keys():
+            for key in sorted(tree.keys()):
                 node = tree[key]
                 if type(node) in [dict, list, set, tuple]:
                     leaves.extend(collect_leaf(node, leaf))
