@@ -2,7 +2,7 @@
 #
 # Unittest for analysis.py
 #
-# Copyright: 2013 (c) Lei Xu <eddyxu@gmail.com>
+# Copyright: 2014 (c) Lei Xu <eddyxu@gmail.com>
 # License: BSD License
 
 """Unit tests for pyro.analysis
