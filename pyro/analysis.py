@@ -112,7 +112,7 @@ class Result(object):
         """
         tmp = self.data_
         for key in keys:
-            if not key in tmp:
+            if key not in tmp:
                 tmp[key] = {}
             tmp = tmp[key]
         return tmp
