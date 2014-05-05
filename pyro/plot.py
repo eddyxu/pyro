@@ -75,6 +75,7 @@ def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
         plt.semilogy()
     plt.legend(ncol=ncol, loc=loc)
     plt.savefig(outfile)
+    plt.close()
 
 
 def plot_dict(data, title, xlabel, ylabel, outfile, **kwargs):
