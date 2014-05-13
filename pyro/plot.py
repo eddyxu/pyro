@@ -52,7 +52,7 @@ def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
     assert curves
     ylim = kwargs.get('ylim', None)
     ncol = kwargs.get('ncol', 1)
-    loc = kwargs.get('loc', 'upper right')
+    loc = kwargs.get('loc', 0)  # best loc
     color_theme = kwargs.get('colortheme', 'black')
     semilogy = kwargs.get('semilogy', False)
 
