@@ -43,14 +43,23 @@ def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
     @param outfile the path of output file
 
     Optional parameters:
+    @param xlim the scale of x-axes
     @param ylim the scale of y-axes
+    @param xticks an array of two arrays: [[pos0, ..], [ticks0, ..]]
     @param ncol number of columns in legends
     @param loc the location of legend
     @param colortheme defaults is black
     @param semilogy set log values on y-axes
     """
     assert curves
+    xlim = kwargs.get('xlim', None)
     ylim = kwargs.get('ylim', None)
+    xticks = kwargs.get('xticks', None)
+    if xticks:
+        assert type(xticks) == list
+        assert len(xticks) == 2
+        assert type(xticks[0]) == list and type(xticks[1]) == list
+        assert len(xticks[0]) == len(xticks[1])
     ncol = kwargs.get('ncol', 1)
     loc = kwargs.get('loc', 0)  # best loc
     color_theme = kwargs.get('colortheme', 'black')
@@ -69,8 +78,12 @@ def plot(curves, title, xlabel, ylabel, outfile, **kwargs):
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    if xlim:
+        plt.xlim(xlim)
     if ylim:
         plt.ylim(ylim)
+    if xticks:
+        plt.xticks(xticks[0], xticks[1])
     if semilogy:
         plt.semilogy()
     plt.legend(ncol=ncol, loc=loc)
